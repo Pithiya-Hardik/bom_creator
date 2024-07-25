@@ -25,7 +25,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Workstation",
-   "options": "Workstation"
+   "options": "Workstation Type"
   },
   {
    "fieldname": "column_break_bkio",
@@ -48,7 +48,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-07-22 22:31:31.318526",
+ "modified": "2024-07-25 17:53:04.106454",
  "modified_by": "Administrator",
  "module": "customapp",
  "name": "Sub Assemblies Oprastion",

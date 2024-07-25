@@ -29,7 +29,6 @@ app_license = "mit"
 
 # include js in doctype views
 doctype_js = {"BOM Creator" : "public/js/bom_cretor_override.js"}
-# doctype_js = {"Production Plan" : "public/override_js_files/production_plan_override.js"}
 
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -229,3 +228,7 @@ override_doctype_class = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+
+fixtures = [
+    {"dt": "Property Setter", "filters": [["module", "in", ["customapp"]]]},   
+]

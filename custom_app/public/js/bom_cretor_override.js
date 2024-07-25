@@ -93,19 +93,19 @@ frappe.ui.form.on("BOM Creator", {
                 frappe.db.insert(values).then((doc) => {
                     frappe.set_route("Form", doc.doctype, doc.name);
                     frappe.call({
-                        method:"custom_app.public.py.bom_creator_override.set_value_in_table",
-                        args:{
+                        method: "custom_app.public.py.bom_creator_override.set_value_in_table",
+                        args: {
                             value: values,
                             name: doc.name
                         },
-                        callback:function(response){
-                            setTimeout(() =>{
+                        callback: function (response) {
+                            setTimeout(() => {
                                 frm.reload_doc();
                             }, 1000)
                         }
                     })
                 });
-            
+
             },
         });
 
@@ -114,44 +114,58 @@ frappe.ui.form.on("BOM Creator", {
     },
 
     build_tree(frm) {
-		let $parent = $(frm.fields_dict["bom_creator"].wrapper);
-		$parent.empty();
-		frm.toggle_enable("item_code", false);
+        let $parent = $(frm.fields_dict["bom_creator"].wrapper);
+        $parent.empty();
+        frm.toggle_enable("item_code", false);
 
-		frappe.require("/assets/custom_app/js/bom_configurator.bundle.js").then(() => {
-			frappe.bom_configurator = new frappe.ui.BOMConfigurator1({
-				wrapper: $parent,
-				page: $parent,
-				frm: frm,
-				bom_configurator: frm.doc.name,
-			});
-		});
-	},
+        frappe.require("/assets/custom_app/js/bom_configurator.bundle.js").then(() => {
+            frappe.bom_configurator = new frappe.ui.BOMConfigurator1({
+                wrapper: $parent,
+                page: $parent,
+                frm: frm,
+                bom_configurator: frm.doc.name,
+            });
+        });
+    },
 
     add_custom_buttons(frm) {
-        console.log("this callllllllll")
-		if (!frm.is_new()) {
-			frm.add_custom_button(__("Rebuild Tree"), () => {
-				frm.trigger("build_tree");
-			});
-		}
+        // console.log("this callllllllll")
+        if (!frm.is_new()) {
+            frm.add_custom_button(__("Rebuild Tree"), () => {
+                frm.trigger("build_tree");
+            });
+        }
 
-		if (frm.doc.docstatus === 1 && frm.doc.status !== "Completed") {
-			frm.add_custom_button(__("Create Multi-level BOM"), () => {
-				frm.trigger("create_multi_level_bom");
-			});
-		}
-	},
+        if (frm.doc.docstatus === 1 && frm.doc.status !== "Completed") {
+            frm.add_custom_button(__("Create Multi-level BOM"), () => {
+                frm.trigger("create_multi_level_bom");
+            });
+        }
+    },
 
     create_multi_level_bom(frm) {
-        console.log("this function is call")
-		frm.call({
-			method: "enqueue_create_boms",
-			doc: frm.doc,
-            callback:function(r){
-                console.log("this callllll")
+        // console.log("this function is call")
+        frm.call({
+            method: "enqueue_create_boms",
+            doc: frm.doc,
+            callback: function (r) {
+                // console.log("this callllll")
             }
-		});
-	},
+        });
+    },
+
+    refresh: function (frm) {
+        if(frm.doc.status == "Completed")
+        frm.add_custom_button(__("Set Operation"), () => {
+            frm.call({
+                method:"custom_app.public.py.bom_creator.set_opreation_bom",
+                args:{
+                    bom_creator:frm.doc.name,
+                    item: frm.doc.item_code,
+                    data:frm.doc.custom_operastion_bom
+                }
+            })
+        });
+    }
 
 })

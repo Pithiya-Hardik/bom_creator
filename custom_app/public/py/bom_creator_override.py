@@ -1,5 +1,6 @@
 import frappe
 import json
+import time
 
 @frappe.whitelist()
 def set_value_in_table(value, name):
@@ -19,7 +20,12 @@ def set_value_in_table(value, name):
     return
 
 
-
+# @frappe.whitelist()
+# def set_opreation_in_bom(self):
+#     print("\n\n\n", self.name, self.item_code)
+#     bom_name = frappe.db.sql("select name from `tabBOM` where bom_creator=%s and item=%s", (self.name, self.item_code), as_dict=True)
+#     print(bom_name)
+#     print(this)
 
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
@@ -204,21 +210,21 @@ class BOMCreator(Document):
 
     @frappe.whitelist()
     def enqueue_create_boms(self):
-        # frappe.log("This is the first call")
         frappe.enqueue(
             self.create_boms,
             queue="short",
             timeout=600,
             is_async=True,
+            # on_success= self.set_opreation_in_bom
         )
 
         frappe.msgprint(
             _("BOMs creation has been enqueued, kindly check the status after some time"), alert=True
         )
 
-    def create_boms(self):
-        # frappe.log("This is the second call")
+        # set_opreation_in_bom(self)
 
+    def create_boms(self):
         self.db_set("status", "In Progress")
         production_item_wise_rm = OrderedDict({})
         production_item_wise_rm.setdefault(
@@ -238,13 +244,7 @@ class BOMCreator(Document):
 
             production_item_wise_rm[(row.fg_item, row.fg_reference_id)]["items"].append(row)
 
-        reverse_tree = OrderedDict(reversed(list(production_item_wise_rm.items())))
-
-        # Define the operations dictionary
-        # data = frappe.json.loads(self)
-        # operations = []
-        # for item in data.custom_operastion_bom:
-        #     operations.append(item)
+        reverse_tree = OrderedDict(reversed(list(production_item_wise_rm.items())))        
 
         try:
             for d in reverse_tree:
@@ -261,27 +261,9 @@ class BOMCreator(Document):
                 }
             )
 
-            frappe.msgprint(_("BOMs creation failed"))
-
-    # def get_operations(self):
-    #     operations = {}
-    #     # Fetch operations from the child table in the BOM Creator doctype
-    #     operation_rows = frappe.get_all(
-    #         "custom_operastion_bom",  # Replace with actual child doctype name
-    #         filters={"parent": self.name},
-    #         fields=["*"]
-    #     )
-
-    #     for row in operation_rows:
-    #         key = (row.operation, row.workstation, row.operation_time)  # Adjust the key fields based on your data structure
-    #         if key not in operations:
-    #             operations[key] = []
-    #         operations[key].append(row)
-
-    #     return operations
+            frappe.msgprint(_("BOMs creation failed"))   
 
     def create_bom(self, row, production_item_wise_rm):
-        # frappe.log("This is the third call")
         bom_creator_item = row.name if row.name != self.name else ""
         if frappe.db.exists(
             "BOM",
@@ -321,29 +303,13 @@ class BOMCreator(Document):
             for field in BOM_ITEM_FIELDS:
                 item_args[field] = item.get(field)
 
-            bom.append("items", item_args)
-            
-        # frappe.log(operations)
-        # # Add operations to the BOM
-        # for operation in operations:
-        #     operation_args = {}
-        #     for field in BOM_OPERATION_FIELDS:
-        #         operation_args[field] = operation.get(field)
-            # bom.append("operations", operations)
-            # data_operation = frappe.json.loads(self)
-            # for item in data_operation.custom_operastion_bom:
-            #     bom.append("operations",
-			# 		{
-			# 			"operation": item["operation"],
-			# 			"workstation_type": item["workstation"],
-			# 			"time_in_mins": item["operation_time"],                
-			# 		},
-			# 	)
+            bom.append("items", item_args)     
 
         bom.save()
         bom.submit()
 
         production_item_wise_rm[(row.item_code, row.name)]["bom_no"] = bom.name
+
         
 @frappe.whitelist()
 def get_children(doctype=None, parent=None, **kwargs):
