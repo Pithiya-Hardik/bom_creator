@@ -78,7 +78,7 @@ frappe.ui.form.on("BOM Creator", {
                             fieldname: 'workstation',
                             label: __('Workstation'),
                             fieldtype: 'Link',
-                            options: 'Workstation',
+                            options: 'Workstation Type',
                             in_list_view: 1,
                             reqd: 1
                         }

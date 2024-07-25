@@ -332,7 +332,7 @@
                 fieldname: "workstation",
                 label: __("Workstation"),
                 fieldtype: "Link",
-                options: "Workstation",
+                options: "Workstation Type",
                 in_list_view: 1,
                 reqd: 1
               }
@@ -465,4 +465,4 @@
   };
   frappe.ui.BOMConfigurator1 = BOMConfigurator;
 })();
-//# sourceMappingURL=bom_configurator.bundle.4DCZQ2HA.js.map
+//# sourceMappingURL=bom_configurator.bundle.JFKBFJMJ.js.map
