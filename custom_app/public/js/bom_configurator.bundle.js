@@ -337,7 +337,7 @@ class BOMConfigurator {
 							fieldname: 'workstation',
 							label: __('Workstation'),
 							fieldtype: 'Link',
-							options: 'Workstation Type',
+							options: 'workstation',
 							in_list_view: 1,
 							reqd: 1
 						}

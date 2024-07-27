@@ -16,7 +16,7 @@ def set_opreation_bom(bom_creator, item, data, sub_items, sub_opration):
         bom_creators.append("operations",
                 {
                     "operation": item["operation"],
-                    "workstation_type": item["workstation"],
+                    "workstation": item["workstation"],
                     "time_in_mins": item["operation_time"],                
                 },
             )
@@ -32,7 +32,7 @@ def set_opreation_bom(bom_creator, item, data, sub_items, sub_opration):
                     add_opration.with_operations = 1
                     add_opration.append("operations",{
                         "operation": sub_oprations["operation"],
-                        "workstation_type": sub_oprations["workstation"],
+                        "workstation": sub_oprations["workstation"],
                         "time_in_mins": sub_oprations["operation_time"],
                     })
                     add_opration.save()
