@@ -15,20 +15,28 @@ def set_value_in_table(value, name):
                     "operation_time": item["operation_time"],                
                 },
             )
-        bom_creator.save()
-        
+        bom_creator.save()        
     return
 
 
-# @frappe.whitelist()
-# def set_opreation_in_bom(self):
-#     print("\n\n\n", self.name, self.item_code)
-#     bom_name = frappe.db.sql("select name from `tabBOM` where bom_creator=%s and item=%s", (self.name, self.item_code), as_dict=True)
-#     print(bom_name)
-#     print(this)
+@frappe.whitelist()
+def set_value_in_table_sub_assembly(value, name):
+    data = frappe.json.loads(value)
+    operation = data['operations']
 
-# Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
-# For license information, please see license.txt
+    for item in operation:      
+
+        sub_assembly_oprastion = frappe.get_doc("BOM Creator", name)
+        sub_assembly_oprastion.append("custom_sub_assemblies_oprastion", {
+            "item_code": data['item_code'],
+            "workstation": item['workstation'],
+            "operation": item['operation'],
+            "operation_time": item['operation_time']
+        })
+
+        sub_assembly_oprastion.save()
+    return
+
 
 import frappe
 import json

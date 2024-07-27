@@ -260,95 +260,13 @@ class BOMConfigurator {
 					view.events.load_tree(r, node);
 				},
 			});
-
 			dialog.hide();
 		});
 	}
 
-	// get_sub_assembly_modal_fields(read_only = false) {
-	// 	return [
-	// 		{
-	// 			label: __("Sub Assembly Item"),
-	// 			fieldname: "item_code",
-	// 			fieldtype: "Link",
-	// 			options: "Item",
-	// 			reqd: 1,
-	// 			read_only: read_only,
-	// 		},
-	// 		{ fieldtype: "Column Break" },
-	// 		{
-	// 			label: __("Qty"),
-	// 			fieldname: "qty",
-	// 			default: 1.0,
-	// 			fieldtype: "Float",
-	// 			reqd: 1,
-	// 			read_only: read_only,
-	// 		},
-	// 		{ fieldtype: "Section Break" },
-	// 		{
-	// 			label: __("Raw Materials"),
-	// 			fieldname: "items",
-	// 			fieldtype: "Table",
-	// 			reqd: 1,
-	// 			fields: [
-	// 				{
-	// 					label: __("Item"),
-	// 					fieldname: "item_code",
-	// 					fieldtype: "Link",
-	// 					options: "Item",
-	// 					reqd: 1,
-	// 					in_list_view: 1,
-	// 				},
-	// 				{
-	// 					label: __("Qty"),
-	// 					fieldname: "qty",
-	// 					default: 1.0,
-	// 					fieldtype: "Float",
-	// 					reqd: 1,
-	// 					in_list_view: 1,
-	// 				},
-	// 			],
-	// 		},
-	// 		{ fieldtype: "Section Break" },
-	// 		{
-	// 			fieldtype: 'Table',
-	// 			label: __('Operations'),
-	// 			fieldname: 'operations',
-	// 			in_place_edit: true,  // Enable inline editing
-	// 			reqd: 1,
-	// 			fields: [					
-	// 				{
-	// 					fieldname: 'operation',
-	// 					label: __('Operation'),
-	// 					fieldtype: 'Link',
-	// 					options: 'Operation',
-	// 					in_list_view: 1,
-	// 					reqd: 1
-	// 				},
-	// 				{
-	// 					fieldname: 'operation_time',
-	// 					label: __('Operation Time'),
-	// 					fieldtype: 'Data',
-	// 					in_list_view: 1,
-	// 					reqd: 1
-	// 				},
-	// 				{
-	// 					fieldname: 'workstation',
-	// 					label: __('Workstation'),
-	// 					fieldtype: 'Link',
-	// 					options: 'Workstation',
-	// 					in_list_view: 1,
-	// 					reqd: 1
-	// 				}
-	// 			],
-	// 			data: []  // Initialize with empty data
-	// 		}
-	// 	];	
-	// }
-
 	get_sub_assembly_modal_fields(read_only = false, operations_data = []) {
 		let dialog = new frappe.ui.Dialog({
-			title: __("Multi-level BOM Creator"),
+			title: __("Sub Assembly Item"),
 			fields: [
 				{
 					label: __("Sub Assembly Item"),
@@ -428,27 +346,20 @@ class BOMConfigurator {
 				}
 			],
 			primary_action_label: __("Create"),
-			primary_action: (values) => {
-				console.log(values)
-				// values.doctype = frm.doc.doctype;
-
-				// frappe.db.insert(values).then((doc) => {
-				// 	frappe.set_route("Form", doc.doctype, doc.name);
-				// 	frappe.call({
-				// 		method: "custom_app.public.py.bom_creator_override.set_value_in_table",
-				// 		args: {
-				// 			value: values,
-				// 			name: doc.name
-				// 		},
-				// 		callback: function (response) {
-				// 			setTimeout(() => {
-				// 				frm.reload_doc();
-				// 			}, 1000)
-				// 		}
-				// 	})
-				// });
-				dialog.hide();
-
+			primary_action: (values) => {				
+				frappe.call({
+					method: "custom_app.public.py.bom_creator_override.set_value_in_table_sub_assembly",
+					args: {
+						value: values,
+						name: this.frm.doc.name
+					},
+					callback: function (response) {
+						dialog.hide();
+						setTimeout(() => {
+							frm.reload_doc();
+						}, 1000)
+					}
+				})
 			},
 		});
 
@@ -490,7 +401,6 @@ class BOMConfigurator {
 					view.events.load_tree(r, node);
 				},
 			});
-
 			dialog.hide();
 		});
 	}

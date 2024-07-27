@@ -18,11 +18,11 @@
 
   // ../custom_app/custom_app/public/js/bom_configurator.bundle.js
   var BOMConfigurator = class {
-    constructor({ wrapper, page, frm, bom_configurator }) {
+    constructor({ wrapper, page, frm: frm2, bom_configurator }) {
       this.$wrapper = $(wrapper);
       this.page = page;
       this.bom_configurator = bom_configurator;
-      this.frm = frm;
+      this.frm = frm2;
       this.make();
       this.prepare_layout();
       this.bind_events();
@@ -261,7 +261,7 @@
     }
     get_sub_assembly_modal_fields(read_only = false, operations_data = []) {
       let dialog = new frappe.ui.Dialog({
-        title: __("Multi-level BOM Creator"),
+        title: __("Sub Assembly Item"),
         fields: [
           {
             label: __("Sub Assembly Item"),
@@ -342,8 +342,19 @@
         ],
         primary_action_label: __("Create"),
         primary_action: (values) => {
-          console.log(values);
-          dialog.hide();
+          frappe.call({
+            method: "custom_app.public.py.bom_creator_override.set_value_in_table_sub_assembly",
+            args: {
+              value: values,
+              name: this.frm.doc.name
+            },
+            callback: function(response) {
+              dialog.hide();
+              setTimeout(() => {
+                frm.reload_doc();
+              }, 1e3);
+            }
+          });
         }
       });
       dialog.fields_dict.item_code.get_query = "erpnext.controllers.queries.item_query";
@@ -465,4 +476,4 @@
   };
   frappe.ui.BOMConfigurator1 = BOMConfigurator;
 })();
-//# sourceMappingURL=bom_configurator.bundle.JFKBFJMJ.js.map
+//# sourceMappingURL=bom_configurator.bundle.GJK6WYXX.js.map

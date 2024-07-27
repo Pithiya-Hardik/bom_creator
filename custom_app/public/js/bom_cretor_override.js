@@ -162,7 +162,9 @@ frappe.ui.form.on("BOM Creator", {
                 args:{
                     bom_creator:frm.doc.name,
                     item: frm.doc.item_code,
-                    data:frm.doc.custom_operastion_bom
+                    data:frm.doc.custom_operastion_bom,
+                    sub_items: frm.doc.items,
+                    sub_opration: frm.doc.custom_sub_assemblies_oprastion
                 }
             })
         });
