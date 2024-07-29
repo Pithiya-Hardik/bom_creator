@@ -5,12 +5,14 @@ frappe.ui.form.on('BOM Creator', {
         if(frm.doc.docstatus == 1) {
             frappe.call({
                 method: "custom_app.public.py.bom_tree_view.execute",
-                args: {},
+                args: {
+                    bom_creator_name: frm.doc.name
+                },
                 callback: function(r) {
                     if (r.message) {
                         let data = r.message;
                         console.log("this callll", data)
-                        render_tree_view(data);
+                        render_tree_view(data, frm);
                     }
                 }
             });
@@ -18,7 +20,7 @@ frappe.ui.form.on('BOM Creator', {
     }
 });
 
-function render_tree_view(data) {
+function render_tree_view(data, frm) {
     let tree_view_html = '';
 
     let parent_nodes = {};

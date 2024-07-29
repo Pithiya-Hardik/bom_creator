@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 
 @frappe.whitelist()
-def execute(filters=None):
+def execute(bom_creator_name=None):
     data = [] 
 
     # Fetch the BOM data
@@ -13,10 +13,13 @@ def execute(filters=None):
         FROM 
             `tabBOM Creator` bc
         WHERE 
-            bc.docstatus = 1
+            bc.docstatus = 1 and
+            bc.name = %s
         ORDER BY 
             bc.name
-    """, as_dict=True)
+    """,(bom_creator_name), as_dict=True)
+
+    # print("\n\nbom_data", bom_data)
 
     # Fetch sub-assembly items
     sub_assembly_items = frappe.db.sql("""
@@ -26,10 +29,13 @@ def execute(filters=None):
         FROM 
             `tabBOM Creator Item` bci
         WHERE 
-            bci.is_expandable = 1
+            bci.is_expandable = 1 and
+            bci.parent = %s
         ORDER BY 
             bci.parent
-    """, as_dict=True)
+    """,(bom_creator_name), as_dict=True)
+
+    # print("\nsub_assembly_items", sub_assembly_items)
 
     # Fetch finished item operations
     finished_operations = frappe.db.sql("""
@@ -39,8 +45,10 @@ def execute(filters=None):
         FROM 
             `tabOperastion Bom` ob
         WHERE 
-            ob.parent IS NOT NULL
-    """, as_dict=True)
+            ob.parent =%s
+    """,(bom_creator_name), as_dict=True)
+
+    # print("\nfinished_operations", finished_operations)
 
     # Fetch sub-assembly operations
     sub_assembly_operations = frappe.db.sql("""
@@ -51,43 +59,48 @@ def execute(filters=None):
         FROM 
             `tabSub Assemblies Oprastion` sao
         WHERE 
-            sao.parent IS NOT NULL
-    """, as_dict=True)
+            sao.parent =%s
+    """,(bom_creator_name), as_dict=True)
+
+    # print("\nsub_assembly_operations", sub_assembly_operations)
 
     # Process the data into a tree structure
     for row in bom_data:
         parent_bom = {
             "name": row.bom_creator,
             "operation_type": "Parent",
-            "operation_name": row.finished_item
+            "operation_name": row.finished_item,
+            "children": []
         }
-        data.append(parent_bom)
-        
+
         for op in finished_operations:
             if op.bom_creator == row.bom_creator:
                 finished_operation = {
-                    "name": op.operation_name,
+                    "name": row.bom_creator,
                     "operation_type": "Finished Item Operation",
-                    "operation_name": op.operation_name
+                    "operation_name": op.operation
                 }
-                data.append(finished_operation)
-        
+                parent_bom["children"].append(finished_operation)
+
         for sub_item in sub_assembly_items:
+            print("\n\n\n", op.bom_creator, "\n", row.bom_creator)
             if sub_item.bom_creator == row.bom_creator:
                 sub_assembly = {
                     "name": sub_item.sub_assembly_item,
                     "operation_type": "Sub Assembly Item",
-                    "operation_name": sub_item.sub_assembly_item
+                    "operation_name": sub_item.sub_assembly_item,
+                    "children": []
                 }
-                data.append(sub_assembly)
-                
                 for op in sub_assembly_operations:
                     if op.bom_creator == row.bom_creator and op.sub_assembly_item == sub_item.sub_assembly_item:
                         sub_assembly_operation = {
-                            "name": op.operation_name,
+                            "name": sub_item.sub_assembly_item,
                             "operation_type": "Sub Assembly Operation",
-                            "operation_name": op.operation_name
+                            "operation_name": op.operation
                         }
-                        data.append(sub_assembly_operation)
+                        sub_assembly["children"].append(sub_assembly_operation)
+                parent_bom["children"].append(sub_assembly)
+
+        data.append(parent_bom)
     
     return data
