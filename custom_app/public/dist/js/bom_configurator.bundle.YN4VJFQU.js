@@ -332,7 +332,7 @@
                 fieldname: "workstation",
                 label: __("Workstation"),
                 fieldtype: "Link",
-                options: "workstation",
+                options: "Workstation",
                 in_list_view: 1,
                 reqd: 1
               }
@@ -359,7 +359,7 @@
       });
       dialog.fields_dict.item_code.get_query = "erpnext.controllers.queries.item_query";
       dialog.show();
-      return fields;
+      return dialog.fields;
     }
     convert_to_sub_assembly(node, view) {
       let dialog = new frappe.ui.Dialog({
@@ -476,4 +476,4 @@
   };
   frappe.ui.BOMConfigurator1 = BOMConfigurator;
 })();
-//# sourceMappingURL=bom_configurator.bundle.P7C2FFVI.js.map
+//# sourceMappingURL=bom_configurator.bundle.YN4VJFQU.js.map

@@ -337,7 +337,7 @@ class BOMConfigurator {
 							fieldname: 'workstation',
 							label: __('Workstation'),
 							fieldtype: 'Link',
-							options: 'workstation',
+							options: 'Workstation',
 							in_list_view: 1,
 							reqd: 1
 						}
@@ -366,7 +366,7 @@ class BOMConfigurator {
 		dialog.fields_dict.item_code.get_query = "erpnext.controllers.queries.item_query";
 		dialog.show();
 
-		return fields;  // Return the dialog variable
+		return dialog.fields;  // Return the dialog variable
 	}
 
 
