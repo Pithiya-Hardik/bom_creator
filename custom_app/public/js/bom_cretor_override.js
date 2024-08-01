@@ -113,6 +113,21 @@ frappe.ui.form.on("BOM Creator", {
         dialog.show();
     },
 
+
+    setup_bom_creator(frm) {
+        frm.dashboard.clear_comment();
+
+        if (!frm.is_new()) {
+            if (!frappe.bom_configurator || frappe.bom_configurator.bom_configurator !== frm.doc.name) {
+                frm.trigger("build_tree");
+            }
+        } else if (!frm.doc.items?.length) {
+            let $parent = $(frm.fields_dict["bom_creator"].wrapper);
+            $parent.empty();
+            frm.trigger("make_new_entry");
+        }
+    },
+
     build_tree(frm) {
         let $parent = $(frm.fields_dict["bom_creator"].wrapper);
         $parent.empty();
@@ -129,7 +144,6 @@ frappe.ui.form.on("BOM Creator", {
     },
 
     add_custom_buttons(frm) {
-        // console.log("this callllllllll")
         if (!frm.is_new()) {
             frm.add_custom_button(__("Rebuild Tree"), () => {
                 frm.trigger("build_tree");
@@ -144,30 +158,28 @@ frappe.ui.form.on("BOM Creator", {
     },
 
     create_multi_level_bom(frm) {
-        // console.log("this function is call")
         frm.call({
             method: "enqueue_create_boms",
             doc: frm.doc,
             callback: function (r) {
-                // console.log("this callllll")
             }
         });
     },
 
     refresh: function (frm) {
-        if(frm.doc.status == "Completed")
-        frm.add_custom_button(__("Set Operation"), () => {
-            frm.call({
-                method:"custom_app.public.py.bom_creator.set_opreation_bom",
-                args:{
-                    bom_creator:frm.doc.name,
-                    item: frm.doc.item_code,
-                    data:frm.doc.custom_operastion_bom,
-                    sub_items: frm.doc.items,
-                    sub_opration: frm.doc.custom_sub_assemblies_oprastion
-                }
-            })
-        });
+        if (frm.doc.status == "Completed")
+            frm.add_custom_button(__("Set Operation"), () => {
+                frm.call({
+                    method: "custom_app.public.py.bom_creator.set_opreation_bom",
+                    args: {
+                        bom_creator: frm.doc.name,
+                        item: frm.doc.item_code,
+                        data: frm.doc.custom_operastion_bom,
+                        sub_items: frm.doc.items,
+                        sub_opration: frm.doc.custom_sub_assemblies_oprastion
+                    }
+                })
+            });
     }
 
 })

@@ -258,6 +258,20 @@ class BOMConfigurator {
 				},
 				callback: (r) => {
 					view.events.load_tree(r, node);
+					// set opration data in table
+					frappe.call({
+						method: "custom_app.public.py.bom_creator_override.set_value_in_table_sub_assembly",
+						args: {
+							value: bom_item,
+							name: this.frm.doc.name
+						},
+						callback: function (response) {
+							dialog.hide();
+							setTimeout(() => {
+								frm.reload_doc();
+							}, 1000)
+						}
+					})
 				},
 			});
 			dialog.hide();
@@ -346,27 +360,27 @@ class BOMConfigurator {
 				}
 			],
 			primary_action_label: __("Create"),
-			primary_action: (values) => {				
-				frappe.call({
-					method: "custom_app.public.py.bom_creator_override.set_value_in_table_sub_assembly",
-					args: {
-						value: values,
-						name: this.frm.doc.name
-					},
-					callback: function (response) {
-						dialog.hide();
-						setTimeout(() => {
-							frm.reload_doc();
-						}, 1000)
-					}
-				})
-			},
+			// primary_action: (values) => {				
+			// frappe.call({
+			// 	method: "custom_app.public.py.bom_creator_override.set_value_in_table_sub_assembly",
+			// 	args: {
+			// 		value: values,
+			// 		name: this.frm.doc.name
+			// 	},
+			// 	callback: function (response) {
+			// 		dialog.hide();
+			// 		setTimeout(() => {
+			// 			frm.reload_doc();
+			// 		}, 1000)
+			// 	}
+			// })
+			// },
 		});
 
 		dialog.fields_dict.item_code.get_query = "erpnext.controllers.queries.item_query";
-		dialog.show();
-
+		dialog.hide();
 		return dialog.fields;  // Return the dialog variable
+
 	}
 
 

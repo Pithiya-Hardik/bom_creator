@@ -254,6 +254,19 @@
           },
           callback: (r) => {
             view.events.load_tree(r, node);
+            frappe.call({
+              method: "custom_app.public.py.bom_creator_override.set_value_in_table_sub_assembly",
+              args: {
+                value: bom_item,
+                name: this.frm.doc.name
+              },
+              callback: function(response) {
+                dialog.hide();
+                setTimeout(() => {
+                  frm.reload_doc();
+                }, 1e3);
+              }
+            });
           }
         });
         dialog.hide();
@@ -340,25 +353,10 @@
             data: []
           }
         ],
-        primary_action_label: __("Create"),
-        primary_action: (values) => {
-          frappe.call({
-            method: "custom_app.public.py.bom_creator_override.set_value_in_table_sub_assembly",
-            args: {
-              value: values,
-              name: this.frm.doc.name
-            },
-            callback: function(response) {
-              dialog.hide();
-              setTimeout(() => {
-                frm.reload_doc();
-              }, 1e3);
-            }
-          });
-        }
+        primary_action_label: __("Create")
       });
       dialog.fields_dict.item_code.get_query = "erpnext.controllers.queries.item_query";
-      dialog.show();
+      dialog.hide();
       return dialog.fields;
     }
     convert_to_sub_assembly(node, view) {
@@ -476,4 +474,4 @@
   };
   frappe.ui.BOMConfigurator1 = BOMConfigurator;
 })();
-//# sourceMappingURL=bom_configurator.bundle.YN4VJFQU.js.map
+//# sourceMappingURL=bom_configurator.bundle.J6UPZED7.js.map
