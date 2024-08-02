@@ -8,9 +8,11 @@
  "field_order": [
   "item_code",
   "workstation",
+  "rate",
   "column_break_bkio",
   "operation",
-  "operation_time"
+  "operation_time",
+  "amount"
  ],
  "fields": [
   {
@@ -42,13 +44,25 @@
    "fieldname": "operation_time",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Operation Time"
+   "label": "Operation Time (Hour)"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-07-27 22:05:04.596712",
+ "modified": "2024-08-02 13:29:29.850488",
  "modified_by": "Administrator",
  "module": "customapp",
  "name": "Sub Assemblies Oprastion",

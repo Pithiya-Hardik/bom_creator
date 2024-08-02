@@ -343,7 +343,7 @@
               },
               {
                 fieldname: "workstation",
-                label: __("Workstation"),
+                label: __("Workstation (Hour)"),
                 fieldtype: "Link",
                 options: "Workstation",
                 in_list_view: 1,
@@ -474,4 +474,4 @@
   };
   frappe.ui.BOMConfigurator1 = BOMConfigurator;
 })();
-//# sourceMappingURL=bom_configurator.bundle.J6UPZED7.js.map
+//# sourceMappingURL=bom_configurator.bundle.UBO7552Z.js.map

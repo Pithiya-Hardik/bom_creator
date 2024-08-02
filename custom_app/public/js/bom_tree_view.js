@@ -11,90 +11,86 @@ frappe.ui.form.on('BOM Creator', {
                 callback: function (r) {
                     if (r.message) {
                         let data = r.message;
-                        // console.log(data)
+                        console.log("data", data)
                         render_tree_view(data, frm);
                     }
                 }
             });
         }
-    }
+        frappe.call({
+            method: "custom_app.public.py.bom_tree_view.calculate_total_amount",
+            args: {
+                name: frm.doc.name
+            }
+        })
+    },
+
 });
 
 
 function render_tree_view(data, frm) {
     let tree_view_html = '';
 
-    let nodes = {}; // Map of all nodes
-    let tree = []; // List of top-level nodes (parents)
+    let nodes = {};
+    let tree = [];
 
-    //     // Create nodes and identify the main parent
     data.forEach(row => {
-        let node = {
-            name: row.name,
-            operation_name: row.operation_name,
-            operation_type: row.operation_type,
-            children: []
-        };
+        if (row.operation_type == "Parent") {
+            let node = {
+                operation_type: row.operation_type,
+                operation_name: row.operation_name,
+                children: []
+            }
 
-        if (row.operation_type === "Parent") {
             nodes[row.name] = node;
             tree.push(node);
         }
-    });
-
-    // Establish parent-child relationships
-    data.forEach(row => {
-        if (row.operation_type === "Finished Item Operation") {
+        else if (row.operation_type == "Finished Item Operation") {
             let parentNode = nodes[row.name];
             if (parentNode) {
                 parentNode.children.push({
-                    name: row.operation_name,
                     operation_name: row.operation_name,
                     operation_type: row.operation_type,
                 });
             }
         }
-    });
-
-    // Establish parent-child relationships for Sub Assembly Item
-    data.forEach(row => {
-        if (row.operation_type === "Sub Assembly Item") {
-            let parentNode = nodes['Main Test']; // Assuming 'Main Test' is the top parent
+        else if (row.operation_type == "Sub Assembly Item") {
+            let parentNode = nodes[row.name];
             if (parentNode) {
-                parentNode.children.push({
-                    name: row.name,
+                var subAssemblyNode = {
+                    item_code: row.item_code,
                     operation_name: row.operation_name,
                     operation_type: row.operation_type,
                     children: []
-                });
+                };
+                parentNode.children.push(subAssemblyNode);
+                // Also add the subAssemblyNode to nodes so that it can be a parent to further nodes
+                nodes[row.operation_name] = subAssemblyNode;
             }
         }
-    });
-
-    // Establish parent-child relationships for Sub Assembly Operation
-    data.forEach(row => {
-        if (row.operation_type === "Sub Assembly Operation") {
-            let subAssemblyNode = nodes['Main Test']
-            if (subAssemblyNode) {
-                subAssemblyNode.children.push({
-                    name: row.operation_name,
-                    operation_name: row.operation_name,
-                    operation_type: row.operation_type,
-                    children: []
-                });
-            }
+        else if (row.operation_type === "Sub Assembly Operation") {
+            let data1 = nodes[row.name]
+            data1.children.forEach(row1 => {
+                if (row1.operation_type == "Sub Assembly Item") {
+                    let subAssembly = row1
+                    if (subAssembly) {
+                        subAssembly.children.push({
+                            item_code: row.item_code,
+                            operation_name: row.operation_name,
+                            operation_type: row.operation_type,
+                        });
+                    }
+                }
+            })
         }
-    });
-    console.log(nodes)
+    })
 
-
-    // Render function to create HTML for a node
     function renderNode(node) {
         let html = `<li>${node.operation_name}`;
-        if (node.children.length > 0) {
+        if (node.children && node.children.length > 0) {
             html += `<ul>`;
             node.children.forEach(child => {
-                html += `<li>${child.operation_name}</li>`;
+                html += renderNode(child);  // Recursively render child nodes
             });
             html += `</ul>`;
         }
@@ -107,103 +103,5 @@ function render_tree_view(data, frm) {
         tree_view_html += `<ul>${renderNode(rootNode)}</ul>`;
     });
 
-    frm.fields_dict['custom_tree_view'].html(tree_view_html);
+    // frm.fields_dict['custom_tree_view'].html(tree_view_html);
 }
-
-// function render_tree_view(data, frm) {
-//     let tree_view_html = '';
-
-//     let nodes = {}; // Map of all nodes
-//     let tree = []; // List of top-level nodes (parents)
-
-//     // Create nodes and identify the main parent
-//     data.forEach(row => {
-//         let node = {
-//             name: row.name,
-//             operation_name: row.operation_name,
-//             operation_type: row.operation_type,
-//             children: []
-//         };
-
-//         nodes[row.name] = node;
-
-//         if (row.operation_type === "Parent") {
-//             tree.push(node);
-//         }
-//     });
-
-//     // Establish parent-child relationships for Finished Item Operation
-//     data.forEach(row => {
-//         if (row.operation_type === "Finished Item Operation") {
-//             let parentNode = nodes[row.name];
-//             if (parentNode) {
-//                 parentNode.children.push({
-//                     name: row.operation_name,
-//                     operation_name: row.operation_name,
-//                     operation_type: row.operation_type,
-//                     children: []
-//                 });
-//             }
-//         }
-//     });
-
-//     // Establish parent-child relationships for Sub Assembly Item
-//     data.forEach(row => {
-//         if (row.operation_type === "Sub Assembly Item") {
-//             let parentNode = nodes['Main Test']; // Assuming 'Main Test' is the top parent
-//             if (parentNode) {
-//                 let subAssemblyItemNode = nodes[row.operation_name];
-//                 if (subAssemblyItemNode) {
-//                     parentNode.children.push(subAssemblyItemNode);
-//                 } else {
-//                     let newSubAssemblyItemNode = {
-//                         name: row.operation_name,
-//                         operation_name: row.operation_name,
-//                         operation_type: row.operation_type,
-//                         children: []
-//                     };
-//                     parentNode.children.push(newSubAssemblyItemNode);
-//                     nodes[row.operation_name] = newSubAssemblyItemNode;
-//                 }
-//             }
-//         }
-//     });
-
-//     // Establish parent-child relationships for Sub Assembly Operation
-//     data.forEach(row => {
-//         if (row.operation_type === "Sub Assembly Operation") {
-//             let subAssemblyNode = nodes['Main Test'];
-//             if (subAssemblyNode) {
-//                 subAssemblyNode.children.push({
-//                     name: row.operation_name,
-//                     operation_name: row.operation_name,
-//                     operation_type: row.operation_type,
-//                     children: []
-//                 });
-//             }
-//         }
-//     });
-
-//     console.log(nodes)
-
-//     // Render function to create HTML for a node
-//     function renderNode(node) {
-//         let html = `<li>${node.operation_name}`;
-//         if (node.children.length > 0) {
-//             html += `<ul>`;
-//             node.children.forEach(child => {
-//                 html += renderNode(child);
-//             });
-//             html += `</ul>`;
-//         }
-//         html += `</li>`;
-//         return html;
-//     }
-
-//     // Render only the main parent and its direct children
-//     tree.forEach(rootNode => {
-//         tree_view_html += `<ul>${renderNode(rootNode)}</ul>`;
-//     });
-
-//     frm.fields_dict['custom_tree_view'].html(tree_view_html);
-// }

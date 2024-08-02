@@ -69,7 +69,7 @@ frappe.ui.form.on("BOM Creator", {
                         },
                         {
                             fieldname: 'operation_time',
-                            label: __('Operation Time'),
+                            label: __('Operation Time (Hour)'),
                             fieldtype: 'Data',
                             in_list_view: 1,
                             reqd: 1

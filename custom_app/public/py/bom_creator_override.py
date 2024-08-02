@@ -7,12 +7,16 @@ def set_value_in_table(value, name):
     data = frappe.json.loads(value)   
     
     for item in data['operations']:
+        rate = frappe.db.sql(" select hour_rate from `tabWorkstation` where name=%s ", (item['workstation']), as_dict=True)
+        amount  = float(rate[0]['hour_rate']) * float(item['operation_time'])
         bom_creator = frappe.get_doc("BOM Creator", name)
         bom_creator.append("custom_operastion_bom",
                 {
                     "operation": item["operation"],
                     "workstation": item["workstation"],
-                    "operation_time": item["operation_time"],                
+                    "operation_time": item["operation_time"],
+                    "rate": rate[0]['hour_rate'],
+                    "amount": amount,                
                 },
             )
         bom_creator.save()        
@@ -25,13 +29,16 @@ def set_value_in_table_sub_assembly(value, name):
     operation = data['operations']
 
     for item in operation:      
-
+        rate = frappe.db.sql(" select hour_rate from `tabWorkstation` where name=%s ",(item['workstation']), as_dict=True)
+        amount = float(rate[0]['hour_rate']) * float(item['operation_time'])
         sub_assembly_oprastion = frappe.get_doc("BOM Creator", name)
         sub_assembly_oprastion.append("custom_sub_assemblies_oprastion", {
             "item_code": data['item_code'],
             "workstation": item['workstation'],
             "operation": item['operation'],
-            "operation_time": item['operation_time']
+            "operation_time": item['operation_time'],
+            "rate": rate[0]['hour_rate'],
+            "amount": amount, 
         })
 
         sub_assembly_oprastion.save()
@@ -73,6 +80,42 @@ BOM_OPERATION_FIELDS = [
 ]
 
 class BOMCreator(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from erpnext.manufacturing.doctype.bom_creator_item.bom_creator_item import BOMCreatorItem
+        from frappe.types import DF
+
+        amended_from: DF.Link | None
+        buying_price_list: DF.Link | None
+        company: DF.Link
+        conversion_rate: DF.Float
+        currency: DF.Link
+        default_warehouse: DF.Link | None
+        error_log: DF.Text | None
+        is_group: DF.Check
+        item_code: DF.Link
+        item_group: DF.Link | None
+        item_name: DF.Data | None
+        items: DF.Table[BOMCreatorItem]
+        lft: DF.Int
+        old_parent: DF.Link | None
+        parent_bom_creator: DF.Link | None
+        plc_conversion_rate: DF.Float
+        price_list_currency: DF.Link | None
+        project: DF.Link | None
+        qty: DF.Float
+        raw_material_cost: DF.Currency
+        remarks: DF.TextEditor | None
+        rgt: DF.Int
+        rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
+        set_rate_based_on_warehouse: DF.Check
+        status: DF.Literal["Draft", "Submitted", "In Progress", "Completed", "Failed", "Cancelled"]
+        uom: DF.Link | None
+    # end: auto-generated types
     def before_save(self):
         self.set_status()
         self.set_is_expandable()

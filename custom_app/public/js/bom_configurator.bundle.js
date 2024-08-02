@@ -349,7 +349,7 @@ class BOMConfigurator {
 						},
 						{
 							fieldname: 'workstation',
-							label: __('Workstation'),
+							label: __('Workstation (Hour)'),
 							fieldtype: 'Link',
 							options: 'Workstation',
 							in_list_view: 1,
@@ -359,22 +359,7 @@ class BOMConfigurator {
 					data: []  // Initialize with empty data
 				}
 			],
-			primary_action_label: __("Create"),
-			// primary_action: (values) => {				
-			// frappe.call({
-			// 	method: "custom_app.public.py.bom_creator_override.set_value_in_table_sub_assembly",
-			// 	args: {
-			// 		value: values,
-			// 		name: this.frm.doc.name
-			// 	},
-			// 	callback: function (response) {
-			// 		dialog.hide();
-			// 		setTimeout(() => {
-			// 			frm.reload_doc();
-			// 		}, 1000)
-			// 	}
-			// })
-			// },
+			primary_action_label: __("Create"),			
 		});
 
 		dialog.fields_dict.item_code.get_query = "erpnext.controllers.queries.item_query";
@@ -487,7 +472,7 @@ class BOMConfigurator {
 		$(main_div).find(".tree-children")[0].style.overflowY = "auto";
 	}
 
-	load_tree(response, node) {
+	load_tree(response, node) {		
 		let item_row = "";
 		let parent_dom = "";
 		let total_amount = response.message.raw_material_cost;

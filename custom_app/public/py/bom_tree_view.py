@@ -83,14 +83,16 @@ def execute(bom_creator_name=None):
     for sub_item in sub_assembly_items:        
         if sub_item.bom_creator == row.bom_creator:
             sub_assembly_items1 = {
-                "name": sub_item.sub_assembly_item,
+                "name": sub_item.bom_creator,
+                "item_code": sub_item.sub_assembly_item,
                 "operation_type": "Sub Assembly Item",
                 "operation_name": sub_item.sub_assembly_item,
             }
     for op in sub_assembly_operations:
         if op.bom_creator == row.bom_creator and op.sub_assembly_item == sub_item.sub_assembly_item:
             sub_assembly_operations1 = {
-                "name": sub_item.sub_assembly_item,
+                "name": sub_item.bom_creator,
+                "item_code": sub_item.sub_assembly_item,
                 "operation_type": "Sub Assembly Operation",
                 "operation_name": op.operation
             }
@@ -98,3 +100,27 @@ def execute(bom_creator_name=None):
     
     
     return bom_data1, finished_operations1, sub_assembly_items1, sub_assembly_operations1
+
+
+
+@frappe.whitelist()
+def calculate_total_amount(name):
+    self = frappe.get_doc("BOM Creator", name)
+
+    main_operation = self.custom_operastion_bom
+    items = self.items
+    sub_assemblies_oprastion = self.custom_sub_assemblies_oprastion
+
+    operation_amount = 0
+    sub_assemblies_rawmaterial_amount = 0
+    for item in main_operation:
+        operation_amount += item.amount
+    for sub_operation in sub_assemblies_oprastion:
+        operation_amount += sub_operation.amount
+    for items in items:
+        sub_assemblies_rawmaterial_amount += items.amount
+
+    total_amount = operation_amount + sub_assemblies_rawmaterial_amount
+    frappe.db.set_value("BOM Creator", name, "custom_sub_assemblies__raw_materials_amount", sub_assemblies_rawmaterial_amount)
+    frappe.db.set_value("BOM Creator", name, "custom_operation_amount", operation_amount)
+    frappe.db.set_value("BOM Creator", name, "custom_total_amount", total_amount)
