@@ -113,21 +113,6 @@ frappe.ui.form.on("BOM Creator", {
         dialog.show();
     },
 
-
-    setup_bom_creator(frm) {
-        frm.dashboard.clear_comment();
-
-        if (!frm.is_new()) {
-            if (!frappe.bom_configurator || frappe.bom_configurator.bom_configurator !== frm.doc.name) {
-                frm.trigger("build_tree");
-            }
-        } else if (!frm.doc.items?.length) {
-            let $parent = $(frm.fields_dict["bom_creator"].wrapper);
-            $parent.empty();
-            frm.trigger("make_new_entry");
-        }
-    },
-
     build_tree(frm) {
         let $parent = $(frm.fields_dict["bom_creator"].wrapper);
         $parent.empty();
